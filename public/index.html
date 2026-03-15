@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Citizen Government Services Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <span class="logo">🇮🇳</span>
+      <div>
+        <h1>Citizen Services Assistant</h1>
+        <p class="tagline">Ask about government services, schemes, and documents</p>
+      </div>
+      <select id="lang-select" aria-label="Select language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ta">தமிழ்</option>
+        <option value="te">తెలుగు</option>
+        <option value="bn">বাংলা</option>
+        <option value="mr">मराठी</option>
+        <option value="gu">ગુજરાતી</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="ml">മലയാളം</option>
+        <option value="pa">ਪੰਜਾਬੀ</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <div class="chat-container">
+      <div id="messages" role="log" aria-live="polite" aria-label="Conversation">
+        <div class="msg assistant">
+          <div class="bubble">
+            👋 Hello! I'm your Government Services Assistant.<br><br>
+            I can help you with:
+            <ul>
+              <li>📋 How to apply for government services (passport, Aadhaar, driving license)</li>
+              <li>💰 Government schemes you may be eligible for</li>
+              <li>📄 Documents required for applications</li>
+              <li>🧭 Navigating government websites</li>
+            </ul>
+            What would you like to know?
+          </div>
+        </div>
+      </div>
+
+      <div class="suggestions">
+        <button class="suggestion-btn" data-msg="How do I apply for a passport?">🛂 Passport Application</button>
+        <button class="suggestion-btn" data-msg="What schemes am I eligible for?">💰 Check Eligibility</button>
+        <button class="suggestion-btn" data-msg="What documents do I need for a driving license?">📄 Driving License Docs</button>
+        <button class="suggestion-btn" data-msg="How do I apply for Aadhaar card?">🪪 Aadhaar Card</button>
+      </div>
+
+      <div class="input-row">
+        <input
+          id="user-input"
+          type="text"
+          placeholder="Ask about a government service…"
+          aria-label="Your message"
+          autocomplete="off"
+        />
+        <button id="send-btn" aria-label="Send message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <p class="disclaimer">This assistant provides general guidance. Always verify with official government portals.</p>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
