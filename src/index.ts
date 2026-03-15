@@ -55,36 +55,46 @@ const PORT = parseInt(process.env.PORT ?? "3000", 10);
 const REDIS_URL = process.env.REDIS_URL;
 const API_KEYS = new Set((process.env.API_KEYS ?? "dev-key").split(",").map((k) => k.trim()));
 
-// Data layer
-const kbRepo = new KnowledgeBaseRepository();
-const docRepo = new DocumentRegistryRepository();
+async function main() {
+  // Data layer — load from Python backend, fall back to seed data
+  const [kbRepo, docRepo] = await Promise.all([
+    KnowledgeBaseRepository.fromBackend(),
+    DocumentRegistryRepository.fromBackend(),
+  ]);
 
-// Core services
-const qaService = new QAService(kbRepo, stubLLM);
-const eligibilityEngine = new EligibilityEngine(kbRepo);
-const documentService = new DocumentRegistryService(docRepo);
-const navigationService = new NavigationService(kbRepo);
-const pageSummarizer = new PageSummarizer(stubLLM);
+  // Core services
+  const qaService = new QAService(kbRepo, stubLLM);
+  const eligibilityEngine = new EligibilityEngine(kbRepo);
+  const documentService = new DocumentRegistryService(docRepo);
+  const navigationService = new NavigationService(kbRepo);
+  const pageSummarizer = new PageSummarizer(stubLLM);
 
-// Orchestration
-const sessionManager = new SessionManager(REDIS_URL);
-const intentClassifier = new IntentClassifier(stubLLM);
-const queryRouter = new QueryRouter(qaService, eligibilityEngine, documentService, navigationService, pageSummarizer);
-const orchestrator = new OrchestratorService(sessionManager, intentClassifier, queryRouter);
+  // Orchestration
+  const sessionManager = new SessionManager(REDIS_URL);
+  const intentClassifier = new IntentClassifier(stubLLM);
+  const queryRouter = new QueryRouter(qaService, eligibilityEngine, documentService, navigationService, pageSummarizer);
+  const orchestrator = new OrchestratorService(sessionManager, intentClassifier, queryRouter);
 
-// API Gateway
-const gateway = new ApiGateway(orchestrator, API_KEYS);
+  // API Gateway
+  const gateway = new ApiGateway(orchestrator, API_KEYS);
 
-gateway.listen(PORT).then(() => {
+  await gateway.listen(PORT);
   console.log(`[server] Citizen Govt Services Assistant running on http://localhost:${PORT}`);
   console.log(`[server] POST /api/v1/chat  (x-api-key: ${[...API_KEYS][0]})`);
   console.log(`[server] Redis: ${REDIS_URL ?? "redis://localhost:6379 (default)"}`);
+
+  // Graceful shutdown
+  process.on("SIGINT", async () => {
+    console.log("\n[server] Shutting down...");
+    await gateway.close();
+    await sessionManager.close();
+    process.exit(0);
+  });
+}
+
+main().catch((err) => {
+  console.error("[server] Fatal error:", err);
+  process.exit(1);
 });
 
-// Graceful shutdown
-process.on("SIGINT", async () => {
-  console.log("\n[server] Shutting down...");
-  await gateway.close();
-  await sessionManager.close();
-  process.exit(0);
-});
+
